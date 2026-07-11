@@ -62,11 +62,11 @@ public class ExternalProfileAndTrackingService {
 
         try {
             var resource = profilesClient.get()
-                    .uri("/api/v1/profiles/{profileId}/objective", userId.userId())
+                    .uri("/api/v1/user-profiles/by-user/{userId}", userId.userId())
                     .header(INTERNAL_HEADER, internalSecret)
                     .retrieve()
-                    .body(ObjectiveResource.class);
-            return Optional.ofNullable(resource).map(ObjectiveResource::objectiveName);
+                    .body(UserProfileResource.class);
+            return Optional.ofNullable(resource).map(UserProfileResource::objectiveName);
         } catch (RestClientException exception) {
             return Optional.empty();
         }
@@ -86,12 +86,12 @@ public class ExternalProfileAndTrackingService {
 
     private boolean existsProfileById(Long profileId) {
         try {
-            var resource = profilesClient.get()
-                    .uri("/api/v1/profiles/{profileId}/exists", profileId)
+            profilesClient.get()
+                    .uri("/api/v1/user-profiles/exists/by-user/{userId}", profileId)
                     .header(INTERNAL_HEADER, internalSecret)
                     .retrieve()
-                    .body(ExistsResource.class);
-            return resource != null && resource.exists();
+                    .toBodilessEntity();
+            return true;
         } catch (RestClientException exception) {
             return false;
         }
@@ -100,7 +100,10 @@ public class ExternalProfileAndTrackingService {
     private Optional<NutritionistResource> getNutritionist(Long userId) {
         try {
             return Optional.ofNullable(nutritionistsClient.get()
-                    .uri("/api/v1/nutritionists/users/{userId}", userId)
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/api/v1/nutritionists/by-user")
+                            .queryParam("userId", userId)
+                            .build())
                     .header(INTERNAL_HEADER, internalSecret)
                     .retrieve()
                     .body(NutritionistResource.class));
@@ -111,21 +114,18 @@ public class ExternalProfileAndTrackingService {
 
     private boolean existsMacronutrientValues(Long macronutrientValuesId) {
         try {
-            var resource = trackingClient.get()
-                    .uri("/api/v1/macronutrient-values/{macronutrientValuesId}/exists", macronutrientValuesId)
+            trackingClient.get()
+                    .uri("/api/v1/macronutrients/{macronutrientValuesId}/exists", macronutrientValuesId)
                     .header(INTERNAL_HEADER, internalSecret)
                     .retrieve()
-                    .body(ExistsResource.class);
-            return resource != null && resource.exists();
+                    .toBodilessEntity();
+            return true;
         } catch (RestClientException exception) {
             return false;
         }
     }
 
-    private record ExistsResource(boolean exists) {
-    }
-
-    private record ObjectiveResource(String objectiveName) {
+    private record UserProfileResource(String objectiveName) {
     }
 
     private record NutritionistResource(Long userId, String fullName) {

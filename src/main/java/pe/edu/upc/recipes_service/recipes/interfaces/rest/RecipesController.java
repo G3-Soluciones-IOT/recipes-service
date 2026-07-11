@@ -297,6 +297,14 @@ public class RecipesController {
         return ResponseEntity.ok(recipeResources);
     }
 
+    @GetMapping("/exists")
+    public ResponseEntity<Boolean> existsByName(@RequestParam String name) {
+        var exists = this.recipeQueryService.handle(new GetAllRecipesQuery())
+                .stream()
+                .anyMatch(recipe -> recipe.getName().equalsIgnoreCase(name));
+        return ResponseEntity.ok(exists);
+    }
+
     @GetMapping("/{recipeId}")
     public ResponseEntity<RecipeResource> getRecipeById(@PathVariable Long recipeId) {
         var getRecipeByIdQuery = new GetRecipesByIdQuery(recipeId);

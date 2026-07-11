@@ -52,6 +52,14 @@ public class IngredientsController {
         return ResponseEntity.ok(ingredientResources);
     }
 
+    @GetMapping("/exists")
+    public ResponseEntity<Boolean> existsByName(@RequestParam String name) {
+        var exists = this.ingredientQueryService.handle(new GetAllIngredientsQuery())
+                .stream()
+                .anyMatch(ingredient -> ingredient.getName().equalsIgnoreCase(name));
+        return ResponseEntity.ok(exists);
+    }
+
     @DeleteMapping("/{ingredientId}")
     public ResponseEntity<?> deleteRecipe(@PathVariable Long ingredientId) {
         var deleteIngredientCommand = new DeleteIngredientCommand(ingredientId);
