@@ -16,7 +16,7 @@ import pe.edu.upc.recipes_service.recipes.interfaces.rest.transform.RecipeTypeRe
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/v1/recipetypes")
+@RequestMapping(value = "/api/v1/recipe-types")
 @Tag(name = "Recipe Types", description = "Recipe Type Management Endpoints")
 public class RecipesTypesController {
 
